@@ -1,0 +1,31 @@
+1. Direct Abbreviation Interpretation
+System Role:
+"You are a clinical language expert."
+
+User Instruction:
+"Interpret the following Swedish medical abbreviation or short term: '{text}'. Return only its full English meaning as a single medical term. Do not explain or translate the sentence, just the term."
+
+Key Features:
+
+Processes standalone Swedish abbreviations
+
+Returns a single English medical term
+
+Strictly prohibits explanations or contextual translations
+
+2. Phrase-Embedded Term Interpretation
+System Role:
+"You are a clinical language expert."
+
+User Instruction:
+"Interpret the following Swedish medical abbreviation or short term: '{text}'. Return only its full English meaning as a single medical term. Do not explain or translate the sentence, just the term."
+
+Note:
+Identical to the direct interpretation prompt, but applied to terms found within clinical phrases/sentences.
+
+3. Error Correction & Clinical Interpretation
+System Role:
+"You are a clinical language expert."
+
+User Instruction:
+"Analyze the following Swedish medical sentence with potential abbreviation errors:\n\n'{text}'\n\nCorrect the abbreviation or error and return only the corrected English medical term that fits the clinical context."
