@@ -1,0 +1,18 @@
+!pip install transformers datasets evaluate sacrebleu nltk torch pandas matplotlib seaborn
+import pandas as pd
+import numpy as np
+import torch
+import time
+import evaluate
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+import matplotlib.pyplot as plt
+import seaborn as sns
+import nltk
+import os
+
+!pip install openai
+# Download resources for METEOR
+nltk.download('wordnet')
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using devices: {device}")

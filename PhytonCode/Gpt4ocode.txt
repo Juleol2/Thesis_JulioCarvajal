@@ -1,0 +1,56 @@
+!pip install openai -q
+
+import pandas as pd
+import time
+import openai
+
+# Load data
+df = pd.read_csv("100.csv")
+
+# Initialize OpenAI client
+client = openai.OpenAI()
+
+# Specific prompt template
+def build_prompt(text):
+    return f"In the Swedish medical sentence: '{text}', identify the abbreviation or key medical term in 'term_swe' and provide only its full English meaning based on clinical context. Return only one English medical term. Do not translate the entire sentence."
+
+# Main translation function
+def translate_terms_with_timing(texts):
+    results = []
+    times = []
+    for text in texts:
+        prompt = build_prompt(text)
+        try:
+            start = time.time()
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a clinical language expert."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=50,
+                temperature=0.2
+            )
+            end = time.time()
+            content = response.choices[0].message.content.strip()
+            results.append(content)
+            times.append(end - start)
+        except Exception as e:
+            print(f"Error: {e}")
+            results.append("ERROR")
+            times.append(0)
+        time.sleep(1)  # respect rate limits
+    return results, times
+
+# Preprocessing
+texts_to_process = df['context'].fillna(df['term_swe']).tolist()
+
+# Execute translation
+translations, durations = translate_terms_with_timing(texts_to_process)
+df['GPT4o_Term'] = translations
+df['ResponseTime_sec'] = durations
+
+# Save results
+output_path = "gpt4o_abbreviation_terms_with_time.csv"
+df.to_csv(output_path, index=False)
+print(f"Results saved to: {output_path}")

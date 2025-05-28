@@ -1,0 +1,31 @@
+% Cost data  
+models = {'GPT-4o', 'DeepSeek', 'Gemini', 'Claude'};  
+usd_input = [2.50, 0.07, 0.15, 15.00];      % USD per 1M tokens (input)  
+usd_output = [10.00, 1.10, 0.60, 75.00];    % USD per 1M tokens (output)  
+project_cost = [0.10, 0.01, 0.01, 0.75];    % Estimated project cost  
+
+% Create a matrix with the data  
+data = [usd_input; usd_output; project_cost]';  
+
+% Create the bar chart  
+figure;  
+b = bar(data, 'grouped');  
+
+% Customize bar colors  
+b(1).FaceColor = [0 0.4470 0.7410]; % Blue for USD Input  
+b(2).FaceColor = [0.8500 0.3250 0.0980]; % Orange for USD Output  
+b(3).FaceColor = [0.9290 0.6940 0.1250]; % Yellow for Project Cost  
+
+% Labels and title  
+set(gca, 'XTickLabel', models);  
+xlabel('Model');  
+ylabel('Cost (USD)');  
+title('Estimated Costs by Model');  
+legend({'USD per 1M Tokens (Input)', 'USD per 1M Tokens (Output)', 'Project Cost'}, 'Location', 'best');  
+grid on;  
+
+% Adjust y-axis limits  
+ylim([0 80]);  
+
+% Save the figure  
+saveas(gcf, 'Figure_5_Bar_Chart_Costs.png');  

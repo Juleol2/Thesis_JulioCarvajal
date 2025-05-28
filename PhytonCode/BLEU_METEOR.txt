@@ -1,0 +1,92 @@
+import pandas as pd
+import nltk
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from nltk.translate.meteor_score import meteor_score
+from nltk.tokenize import word_tokenize
+
+# Download NLTK resources
+nltk.download('punkt')
+nltk.download('wordnet')
+
+# BLEU-1 with smoothing
+smoothie = SmoothingFunction().method4
+
+def calculate_bleu1(reference, hypothesis):
+    try:
+        if pd.isna(hypothesis):
+            return 0.0
+        ref_tokens = [word_tokenize(reference.lower())]
+        hyp_tokens = word_tokenize(hypothesis.lower())
+        score = sentence_bleu(ref_tokens, hyp_tokens, weights=(1, 0, 0, 0), smoothing_function=smoothie)
+        return score * 100
+    except:
+        return 0.0
+
+def calculate_meteor(reference, hypothesis):
+    try:
+        if pd.isna(hypothesis):
+            return 0.0
+        ref_tokens = word_tokenize(reference.lower())
+        hyp_tokens = word_tokenize(hypothesis.lower())
+        return meteor_score([ref_tokens], hyp_tokens) * 100
+    except:
+        return 0.0
+
+def exact_match(reference, hypothesis):
+    if pd.isna(hypothesis):
+        return 0
+    return int(reference.strip().lower() == hypothesis.strip().lower())
+
+# Load CSV
+df = pd.read_csv('results.csv')
+
+# Rename columns for consistency
+df.rename(columns={
+    'term_eng': 'Reference',
+    'GPT4o_Term': 'GPT4oMini',
+    'DeepSeek_Term': 'DeepSeek',
+    'Gemini_term': 'Gemini',
+    'Claude_term': 'Claude'
+}, inplace=True)
+
+# Verify number of rows
+print(f"Number of rows in DataFrame: {len(df)}")
+
+# Check duplicates to confirm they are preserved
+print("\nDuplicates in DataFrame:\n", df[df['term_swe'].duplicated(keep=False)][['term_swe', 'Reference', 'Claude', 'GPT4oMini', 'Gemini', 'DeepSeek']])
+
+# Evaluate models
+models = ['Claude', 'GPT4oMini', 'Gemini', 'DeepSeek']
+
+for model in models:
+    df[f'{model}_BLEU1'] = df.apply(lambda row: calculate_bleu1(row['Reference'], row[model]), axis=1)
+    df[f'{model}_METEOR'] = df.apply(lambda row: calculate_meteor(row['Reference'], row[model]), axis=1)
+    df[f'{model}_Exact'] = df.apply(lambda row: exact_match(row['Reference'], row[model]), axis=1)
+
+# Averages
+summary = {
+    'Model': models,
+    'BLEU1_Avg': [df[f'{m}_BLEU1'].mean() for m in models],
+    'METEOR_Avg': [df[f'{m}_METEOR'].mean() for m in models],
+    'ExactMatch_%': [df[f'{m}_Exact'].mean() * 100 for m in models]
+}
+
+summary_df = pd.DataFrame(summary)
+
+# Show summary
+print("\nMetrics summary:")
+print(summary_df)
+
+# Select columns for detailed file, excluding response times
+detailed_columns = [
+    'term_swe', 'Reference',
+    'Claude', 'Claude_BLEU1', 'Claude_METEOR', 'Claude_Exact',
+    'GPT4oMini', 'GPT4oMini_BLEU1', 'GPT4oMini_METEOR', 'GPT4oMini_Exact',
+    'Gemini', 'Gemini_BLEU1', 'Gemini_METEOR', 'Gemini_Exact',
+    'DeepSeek', 'DeepSeek_BLEU1', 'DeepSeek_METEOR', 'DeepSeek_Exact'
+]
+
+# Save detailed results without response time columns
+df[detailed_columns].to_csv('comparison_metrics_detailed.csv', index=False)
+summary_df.to_csv('comparison_metrics_summary.csv', index=False)
+print("\nFiles saved: 'comparison_metrics_detailed.csv' and 'comparison_metrics_summary.csv'")

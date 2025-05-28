@@ -1,0 +1,31 @@
+% Accuracy data by category  
+models = {'GPT-4o', 'DeepSeek', 'Gemini', 'Claude'};  
+simple_words = [100, 86.27, 84.31, 90.20];  % Simple words  
+phrases = [90, 80, 70, 83.33];              % Phrases  
+typos = [71.43, 57.14, 47.62, 66.67];       % Corrected typos  
+
+% Create a matrix with the data  
+data = [simple_words; phrases; typos]';  
+
+% Create the bar chart  
+figure;  
+b = bar(data, 'grouped');  
+
+% Customize bar colors  
+b(1).FaceColor = [0 0.4470 0.7410];      % Blue for Simple Words  
+b(2).FaceColor = [0.8500 0.3250 0.0980]; % Orange for Phrases  
+b(3).FaceColor = [0.9290 0.6940 0.1250]; % Yellow for Typos  
+
+% Labels and title  
+set(gca, 'XTickLabel', models);  
+xlabel('Model');  
+ylabel('Accuracy (%)');  
+title('Translation Accuracy by Category');  
+legend({'Simple Words', 'Phrases', 'Corrected Typos'}, 'Location', 'best');  
+grid on;  
+
+% Adjust y-axis limits  
+ylim([0 100]);  
+
+% Save the figure  
+saveas(gcf, 'Figure_4_Bar_Chart_Accuracy.png');  

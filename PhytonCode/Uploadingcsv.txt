@@ -1,0 +1,21 @@
+import pandas as pd
+
+# Load the dataset
+csv_file = "100.csv"  # Your filename
+try:
+    df = pd.read_csv(csv_file)
+    # Validate expected columns
+    expected_columns = ['term_swe', 'term_eng', 'context']
+    if not all(col in df.columns for col in ['term_swe', 'term_eng']):
+        raise ValueError("CSV file must contain at least 'term_swe' and 'term_eng' columns")
+    # Fill null values in 'context' with empty strings
+    df['context'] = df['context'].fillna('')
+    print(f"Dataset loaded successfully: {len(df)} rows")
+    print("First 5 rows:")
+    print(df.head())
+except FileNotFoundError:
+    print(f"Error: File {csv_file} not found")
+    df = pd.DataFrame()
+except Exception as e:
+    print(f"Error loading CSV: {e}")
+    df = pd.DataFrame()

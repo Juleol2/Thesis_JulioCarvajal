@@ -1,0 +1,18 @@
+!pip install rouge-score
+from rouge_score import rouge_scorer
+import pandas as pd
+
+df = pd.read_csv("results.csv")
+scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+models = ['GPT4o_Term', 'DeepSeek_Term', 'Gemini_term', 'Claude_term']
+rouge_scores = {model: [] for model in models}
+
+for index, row in df.iterrows():
+    reference = row['term_eng']
+    for model in models:
+        candidate = row[model]
+        score = scorer.score(reference, candidate)['rougeL'].fmeasure
+        rouge_scores[model].append(score)
+
+avg_rouge = {model: sum(scores) / len(scores) for model, scores in rouge_scores.items()}
+print(avg_rouge)

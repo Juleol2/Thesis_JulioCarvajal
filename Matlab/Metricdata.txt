@@ -1,0 +1,31 @@
+% Metric data (BLEU, METEOR, ROUGE-L)
+models = {'GPT-4o', 'DeepSeek', 'Gemini', 'Claude'};
+bleu = [92.75, 88.10, 85.00, 89.00];  % BLEU scores
+meteor = [62.55, 58.00, 54.00, 60.20]; % METEOR scores
+rouge_l = [86.66, 70.92, 69.00, 77.06]; % Updated ROUGE-L scores
+
+% Create a matrix with the data
+data = [bleu; meteor; rouge_l]';
+
+% Create the bar chart
+figure; % Open a new figure
+b = bar(data, 'grouped');
+
+% Customize bar colors
+b(1).FaceColor = [0 0.4470 0.7410]; % Blue for BLEU
+b(2).FaceColor = [0.8500 0.3250 0.0980]; % Orange for METEOR
+b(3).FaceColor = [0.9290 0.6940 0.1250]; % Yellow for ROUGE-L
+
+% Labels and title
+set(gca, 'XTickLabel', models); % X-axis labels
+xlabel('Model');
+ylabel('Score (%)');
+title('General Translation Accuracy by Model');
+legend({'BLEU', 'METEOR', 'ROUGE-L'}, 'Location', 'best');
+grid on; % Add grid
+
+% Adjust y-axis limits (e.g., 0-100%)
+ylim([0 100]);
+
+% Save the figure
+saveas(gcf, 'Figure_2_Bar_Chart.png');

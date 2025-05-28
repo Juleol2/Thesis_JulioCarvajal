@@ -1,0 +1,81 @@
+import pandas as pd
+import time
+import anthropic
+from tqdm import tqdm
+
+# Configure API
+client = anthropic.Anthropic(api_key="sk-Claude_key") 
+
+# Input files configuration
+files_and_prompts = [
+    {
+        "input_file": "direct.csv",
+        "output_file": "claude_terms.csv",
+        "prompt_template": (
+            "You are a clinical language expert. Interpret the following Swedish medical abbreviation or short term: '{text}'. "
+            "Return only its full English meaning as a single medical term. Do not explain or translate the sentence, just the term."
+        )
+    },
+    {
+        "input_file": "phrases.csv",
+        "output_file": "claude_phrases.csv",
+         "prompt_template": (
+            "You are a clinical language expert. Interpret the following Swedish medical abbreviation or short term: '{text}'. "
+            "Return only its full English meaning as a single medical term. Do not explain or translate the sentence, just the term."
+        )
+    },
+    {
+        "input_file": "errors.csv",
+        "output_file": "claude_errors.csv",
+        "prompt_template": (
+            "You are a clinical language expert. Analyze the following Swedish medical sentence with potential abbreviation errors:\n\n'{text}'\n\n"
+            "Correct the abbreviation or error and return only the corrected English medical term that fits the clinical context."
+        )
+    }
+]
+
+# Model to use
+model_name = "claude-3-opus-20240229"
+
+# Function to process text with Claude
+def process_with_claude(texts, prompt_template):
+    outputs = []
+    for text in tqdm(texts):
+        prompt = prompt_template.format(text=text.strip())
+        try:
+            start = time.time()
+            response = client.messages.create(
+                model=model_name,
+                max_tokens=100,
+                system="You are a clinical language expert.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            elapsed = time.time() - start
+            outputs.append({
+                "input": text,
+                "claude_output": response.content[0].text.strip(),
+                "response_time_sec": round(elapsed, 2)
+            })
+        except Exception as e:
+            outputs.append({
+                "input": text,
+                "claude_output": f"Error: {str(e)}",
+                "response_time_sec": 0
+            })
+    return pd.DataFrame(outputs)
+
+# Execute processing for each file
+for item in files_and_prompts:
+    df = pd.read_csv(item["input_file"])
+    if 'term_swe' in df.columns:
+        texts = df['term_swe'].dropna().astype(str).tolist()
+    elif 'context' in df.columns:
+        texts = df['context'].dropna().astype(str).tolist()
+    else:
+        print(f"No 'term_swe' or 'context' column in {item['input_file']}")
+        continue
+
+    print(f"Processing {item['input_file']} with {len(texts)} entries...")
+    result_df = process_with_claude(texts, item["prompt_template"])
+    result_df.to_csv(item["output_file"], index=False)
+    print(f"Saved to: {item['output_file']}")

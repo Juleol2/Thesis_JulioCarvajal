@@ -1,0 +1,80 @@
+!pip install google-generativeai
+
+import google.generativeai as genai
+import os
+import time
+import pandas as pd
+from requests.exceptions import HTTPError
+
+# Configure Gemini API
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable not set. Add your new API key.")
+genai.configure(api_key=GEMINI_API_KEY)
+
+# Function for direct translation with Gemini
+def translate_gemini_direct(texts):
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        translations = []
+        for text in texts:
+            if not text.strip():
+                translations.append("No text")
+                continue
+            prompt = f"In the Swedish medical sentence: '{text}', identify the abbreviation or key medical term in 'term_swe' and provide only its full English meaning based on clinical context. Return only one English medical term. Do not translate the entire sentence."
+            try:
+                response = model.generate_content(prompt)
+                if response.text:
+                    translations.append(response.text.strip())
+                else:
+                    translations.append("No translation")
+            except HTTPError as http_err:
+                if "429" in str(http_err):
+                    print("Error: API quota exceeded (15 requests/minute). Wait 1 minute and retry.")
+                    translations.append("Quota exceeded")
+                else:
+                    print(f"HTTP error in Gemini translation: {http_err}")
+                    translations.append("Error")
+            except Exception as e:
+                print(f"Error in Gemini translation: {e}")
+                translations.append("Error")
+            time.sleep(1)  # Delay to respect rate limits
+        return translations
+    except Exception as e:
+        print(f"General error in Gemini translation: {e}")
+        return ["Error"] * len(texts)
+
+# Translate with Gemini (direct, batch of 15 lines)
+gemini_results = []
+start_time = time.time()
+iteration_count = 0
+if not df.empty:
+    # Set row range (change for each batch)
+    start_row = 75  # First row (index 0)
+    end_row = 83   # Last row (index 14, for 15 lines)
+    if end_row > len(df):
+        end_row = len(df)
+    terms = [row['context'] if row['context'].strip() else row['term_swe'] for _, row in df.iloc[start_row:end_row].iterrows()]
+    translations = translate_gemini_direct(terms)
+    elapsed_time = time.time() - start_time
+    for j, (_, row) in enumerate(df.iloc[start_row:end_row].iterrows()):
+        iteration_count += 1
+        gemini_results.append({
+            'Term': terms[j],
+            'Reference': row['term_eng'],
+            'Gemini_Direct': translations[j],
+            'Gemini_Direct_time': elapsed_time / iteration_count if iteration_count > 0 else 0
+        })
+    # Print results summary
+    print("\nDirect translations summary (Gemini):")
+    for result in gemini_results:
+        print(f"Term: {result['Term']} -> Gemini_Direct: {result['Gemini_Direct']}")
+    print(f"Processed rows {start_row} to {end_row-1} ({len(terms)} lines)")
+else:
+    print("Error: DataFrame is empty. Verify 100.csv")
+
+gemini_df = pd.DataFrame(gemini_results)
+output_file = f'gemini_results_{start_row}_{end_row-1}.csv'  # Unique name per batch
+gemini_df.to_csv(output_file, index=False)
+print(f"Gemini results (direct translation) saved to {output_file}")
+print(f"Total time: {elapsed_time:.2f} seconds")

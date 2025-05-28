@@ -1,0 +1,31 @@
+% Time data (Average, Max, Min)
+models = {'GPT-4o', 'DeepSeek', 'Gemini', 'Claude'};
+avg_time = [0.51, 5.34, 4.21, 1.44];  % Average time
+max_time = [1.79, 13.51, 24.89, 3.16]; % Maximum time
+min_time = [0.22, 3.54, 1.39, 0.90];  % Minimum time
+
+% Create a matrix with the data
+data = [avg_time; max_time; min_time]';
+
+% Create the bar chart
+figure; % Open a new figure
+b = bar(data, 'grouped');
+
+% Customize bar colors
+b(1).FaceColor = [0 0.4470 0.7410]; % Blue for Average Time
+b(2).FaceColor = [0.8500 0.3250 0.0980]; % Orange for Max Time
+b(3).FaceColor = [0.9290 0.6940 0.1250]; % Yellow for Min Time
+
+% Labels and title
+set(gca, 'XTickLabel', models);
+xlabel('Model');
+ylabel('Time (sec)');
+title('Response Times by Model');
+legend({'Average Time', 'Max Time', 'Min Time'}, 'Location', 'best');
+grid on;
+
+% Adjust y-axis limits
+ylim([0 30]);
+
+% Save the figure
+saveas(gcf, 'Figure_3_Bar_Chart_Times.png');
