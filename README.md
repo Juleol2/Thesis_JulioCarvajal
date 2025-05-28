@@ -7,7 +7,7 @@ Below is a quick guide to the files and folders included in this repository:
 
 
 
-#Dataset:
+**Dataset:**
 
 100.csv: The original dataset with 100 Swedish medical terms, their reference English translations, and context. Constructed using SNOMED CT Browser and Folkets Lexikon
 
@@ -15,7 +15,7 @@ results.csv: Translation outputs from GPT-4o, DeepSeek, Gemini, and Claude for e
 
 
 
-Matlab:
+**Matlab:**
 
 Accuracydata.txt: Data file containing accuracy metrics, used for generating bar charts (Figures 2–5) in Chapter 6.
 
@@ -28,7 +28,7 @@ Timedata.txt: Data file with response time measurements.
 
 
 
-PythonCode:
+**PythonCode:**
 
 BLEU_METEOR.txt: Python script or code snippet for calculating BLEU and METEOR scores.
 
@@ -49,7 +49,7 @@ Uploadingcsv.txt: Code or notes for uploading CSV files (e.g., results.csv).
 
 
 
-Prompts:
+**Prompts:**
 
 PromptClaudeDeepseek.txt: Prompts used for interacting with Claude and DeepSeek models.
 
