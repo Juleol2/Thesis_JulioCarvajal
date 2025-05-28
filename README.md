@@ -11,8 +11,11 @@ results.csv: Translation outputs from GPT-4o, DeepSeek, Gemini, and Claude for e
 
 Matlab:
 Accuracydata.txt: Data file containing accuracy metrics, used for generating bar charts (Figures 2–5) in Chapter 6.
+
 Costdata.txt: Data file with cost-related information for the models.
+
 Metricdata.txt: Data file with metric calculations (e.g., BLEU, METEOR, ROUGE-L).
+
 Timedata.txt: Data file with response time measurements.
 
 
